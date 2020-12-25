@@ -44,7 +44,8 @@ class FindTreasure(object):
             interaction = 'total_steps = %s' % (self.step_counter)
             print('\r{}'.format(interaction), end='')
             time.sleep(2)
-            print('\r                                ', end='')
+            # print('\r                                ', end='')
+            print('')
         else:
             env_list[self.position] = 'o'
             interaction = ''.join(env_list)
