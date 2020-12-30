@@ -6,6 +6,7 @@ Run this program and to see how the agent will improve its strategy of finding t
 View more on my tutorial page: https://morvanzhou.github.io/tutorials/
 """
 
+import treasure_env
 from treasure_env import FindTreasure
 from q_table_learning import QTableLearning
 import numpy as np
@@ -15,16 +16,16 @@ import pandas as pd
 np.random.seed(2)  # reproducible
 
 
-ACTIONS = ['left', 'right']     # available actions
-
 MAX_EPISODES = 13   # maximum episodes
-FRESH_TIME = 0.3    # fresh time for one move
-
+EPSILON = 0.9   # greedy police
+ALPHA = 0.1     # learning rate
+GAMMA = 0.9    # discount factor
 
 def main():
     N_STATES = 7
 
-    rl = QTableLearning(N_STATES, ACTIONS)
+    rl = QTableLearning(treasure_env.ACTIONS,
+        learning_rate=ALPHA, reward_decay=GAMMA, e_greedy=EPSILON)
     env = FindTreasure(N_STATES)
     
     for episode in range(MAX_EPISODES):

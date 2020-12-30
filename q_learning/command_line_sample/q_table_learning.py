@@ -2,36 +2,56 @@
 import numpy as np
 import pandas as pd
 
-EPSILON = 0.9   # greedy police
-ALPHA = 0.1     # learning rate
-GAMMA = 0.9    # discount factor
-
 class QTableLearning(object):
-    def __init__(self, n_states, actions):
+    def __init__(self, actions, learning_rate=0.01, reward_decay=0.9, e_greedy=0.9):
         super(QTableLearning, self).__init__()
-        self.table = pd.DataFrame(
-            np.zeros((n_states, len(actions))), # q_table initial values
-            columns=actions, # actions's name
-        )
+        self.q_table = pd.DataFrame(columns=actions, dtype=np.float64)
         self.actions = actions
+        self.lr = learning_rate
+        self.gamma = reward_decay
+        self.epsilon = e_greedy
+    
 
     def choose_action(self, state):
-        # This is how to choose an action
-        state_actions = self.table.iloc[state, :]
-        if (np.random.uniform() > EPSILON) or ((state_actions == 0).all()):  # act non-greedy or state-action have no value
-            action_name = np.random.choice(self.actions)
-        else:   # act greedy
-            action_name = state_actions.idxmax()    # replace argmax to idxmax as argmax means a different function in newer version of pandas
-        return action_name
+        self.check_state_exist(state)
+        # action selection
+        if np.random.uniform() < self.epsilon:
+            # choose best action
+            state_action = self.q_table.loc[state, :]
+            # some actions may have the same value, randomly choose on in these actions
+            action = np.random.choice(state_action[state_action == np.max(state_action)].index)
+        else:
+            # choose random action
+            action = np.random.choice(self.actions)
+        return action
 
     def learn(self, state, action, reward, new_state, done):
+        self.check_state_exist(new_state)
         # learn from the transition
-        q_predict = self.table.loc[state, action]
+        q_predict = self.q_table.loc[state, action]
         if (not done):
-            q_target = reward + GAMMA * self.table.iloc[new_state, :].max()
+            q_target = reward + self.gamma * self.q_table.loc[new_state, :].max()
         else:
             q_target = reward
-        self.table.loc[state, action] += ALPHA * (q_target - q_predict)  # update
+        self.q_table.loc[state, action] += self.lr * (q_target - q_predict)  # update
+
+    def check_state_exist(self, state):
+        if state not in self.q_table.index:
+            # append new state to q table
+            self.q_table = self.q_table.append(
+                pd.Series(
+                    [0]*len(self.actions),
+                    index=self.q_table.columns,
+                    name=state,
+                )
+            )
+
+    def load_model_from_file(self, csv_path):
+        self.q_table = pd.read_csv(csv_path, index_col=0)
+        self.q_table.columns = self.actions
+
+    def save_model_to_file(self, csv_path):
+        self.q_table.to_csv(csv_path)
 
     def show(self):
-        print(self.table)
+        print(self.q_table)
