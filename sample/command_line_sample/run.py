@@ -8,6 +8,8 @@ View more on my tutorial page: https://morvanzhou.github.io/tutorials/
 
 import treasure_env
 from treasure_env import FindTreasure
+import sys
+sys.path.append('../../core/q_learning/')
 from q_table_learning import QTableLearning
 import numpy as np
 import pandas as pd

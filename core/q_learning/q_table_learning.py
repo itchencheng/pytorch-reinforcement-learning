@@ -1,6 +1,7 @@
 
 import numpy as np
 import pandas as pd
+import os
 
 class QTableLearning(object):
     def __init__(self, actions, learning_rate=0.01, reward_decay=0.9, e_greedy=0.9):
@@ -47,6 +48,8 @@ class QTableLearning(object):
             )
 
     def load_model_from_file(self, csv_path):
+        if (not os.path.exists(csv_path)):
+            return
         self.q_table = pd.read_csv(csv_path, index_col=0)
         self.q_table.columns = self.actions
 
