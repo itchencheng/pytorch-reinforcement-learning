@@ -23,7 +23,7 @@ env = grid_game_env.FrozenLakeWapper(env)
 model_path = 'model/frozen_lake_slippery.csv'
 '''
 
-def main(max_episodes):
+def main(mode, max_episodes):
     ACTIONS = [0, 1, 2, 3]
     rl = q_table_learning.QTableLearning(ACTIONS,
         learning_rate=0.1, reward_decay=0.9, e_greedy=0.9)
@@ -37,12 +37,13 @@ def main(max_episodes):
         done = False
         step = 0
         while not done:
-            action = rl.choose_action(state)
-           
+            action = rl.choose_action(state, mode)
+            
             new_state, reward, done, x = env.step(action)
             env.render()
             
-            rl.learn(state, action, reward, new_state, done)
+            if (mode == "train"):
+                rl.learn(state, action, reward, new_state, done)
             
             state = new_state 
             
@@ -55,6 +56,8 @@ def main(max_episodes):
 
     print("finished")
 
+
 if __name__ == "__main__":
-    max_episodes = int(sys.argv[1])
-    main(max_episodes)
+    mode = sys.argv[1] # "inference" or "train"
+    max_episodes = int(sys.argv[2])
+    main(mode, max_episodes)
